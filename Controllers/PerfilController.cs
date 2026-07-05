@@ -83,13 +83,13 @@ namespace ProyectoKpote.Controllers
 
             if (passwordNueva != passwordConfirmar)
             {
-                TempData["PasswordError"] = "La nueva contraseña y su confirmación no coinciden.";
+                TempData["PasswordError"] = "La nueva clave y su confirmación no coinciden.";
                 return RedirectToAction("Index");
             }
 
             if (passwordNueva.Length < 6)
             {
-                TempData["PasswordError"] = "La nueva contraseña debe tener al menos 6 caracteres.";
+                TempData["PasswordError"] = "La nueva clave debe tener al menos 6 caracteres.";
                 return RedirectToAction("Index");
             }
 
@@ -99,7 +99,7 @@ namespace ProyectoKpote.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al calcular el hash de la nueva contraseña para el usuario {UsuarioId}.", usuarioId);
+                _logger.LogError(ex, "Error al calcular el hash de la nueva clave para el usuario {UsuarioId}.", usuarioId);
                 TempData["PasswordError"] = "Ocurrió un error al procesar su solicitud. Intente nuevamente.";
                 return RedirectToAction("Index");
             }
@@ -117,7 +117,7 @@ namespace ProyectoKpote.Controllers
 
             _logger.LogInformation("Contraseña actualizada correctamente para el usuario {UsuarioId}.", usuarioId);
 
-            TempData["PasswordExito"] = "Contraseña actualizada correctamente.";
+            TempData["PasswordExito"] = "Se guardaron los cambios.";
             return RedirectToAction("Index");
         }
 

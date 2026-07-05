@@ -71,7 +71,7 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
+        <div class="container text-center">
             2026 - Desarrollado por Carlos Capote
         </div>
     </footer>
@@ -84,22 +84,14 @@
     @await RenderSectionAsync("Scripts", required: false)
 
     @if (Context.Session.GetString("UsuarioLogueado") != null)
-{
-    <script>
-(function () {
-            const inactivityLimitMs = 60 * 1000;  // 1 minuto totales (PRUEBAS)
-            // const inactivityLimitMs = 20 * 60 * 1000; // 20 minutos totales (PRODUCCIÓN)
-            const warningBeforeMs = 15 * 1000;    // Aviso 15 segundos antes de expirar (PRUEBAS)
+    {
+        <script>
+            (function () {
+            const inactivityLimitMs = 20 * 60 * 1000;
 
-            // IMPORTANTE: el IdleTimeout de la sesión (Program.cs) debe ser IGUAL o MAYOR
-            // a inactivityLimitMs. Si son iguales, la sesión del servidor puede expirar
-            // justo antes de que el usuario logre dar clic en "Extender sesión".
+            const warningBeforeMs = 60 * 1000;
 
-            // Intervalo mínimo entre "toques" reales al servidor para mantener viva la
-            // sesión mientras el usuario está activo. No se hace un fetch en cada
-            // mousemove/keydown/click/scroll (sería excesivo); se limita (throttle) a
-            // este intervalo, y siempre debe ser menor a inactivityLimitMs.
-            const touchThrottleMs = 20 * 1000; // (PRUEBAS) ajustar proporcional si cambia inactivityLimitMs
+            const touchThrottleMs = 60 * 1000;
 
             let warningTimer;
             let countdownInterval;
@@ -107,118 +99,111 @@
             let ultimoToqueServidor = 0;
 
             function reiniciarTimers() {
-                clearTimeout(warningTimer);
+            clearTimeout(warningTimer);
 
-                if (alertaActiva) {
-                    Swal.close();
-                    alertaActiva = false;
-                }
-
-                warningTimer = setTimeout(mostrarAdvertencia, inactivityLimitMs - warningBeforeMs);
+            if (alertaActiva) {
+            Swal.close();
+            alertaActiva = false;
             }
 
-            // Mantiene viva la sesión en el servidor mientras el usuario interactúa,
-            // para que el IdleTimeout de ASP.NET Core no expire "en silencio" mientras
-            // el contador del cliente sigue creyendo que hay actividad.
+            warningTimer = setTimeout(mostrarAdvertencia, inactivityLimitMs - warningBeforeMs);
+            }
+
             function tocarServidorSiCorresponde() {
-                const ahora = Date.now();
+            const ahora = Date.now();
 
-                if (ahora - ultimoToqueServidor < touchThrottleMs) {
-                    return;
-                }
+            if (ahora - ultimoToqueServidor < touchThrottleMs) {
+            return;
+            }
 
-                ultimoToqueServidor = ahora;
+            ultimoToqueServidor = ahora;
 
-                fetch('/Login/ExtenderSesion', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) {
-                            // La sesión ya no existe en el servidor (expiró o se cerró
-                            // desde otra pestaña). No tiene sentido seguir esperando.
-                            cerrarSesionPorInactividad();
-                        }
-                    })
-                    .catch(() => {
-                        // Falla de red puntual: no forzamos logout aquí para evitar
-                        // cerrar sesión por un error transitorio de conexión.
-                    });
+            fetch('/Login/ExtenderSesion', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+            if (!data.success) {
+            cerrarSesionPorInactividad();
+            }
+            })
+            .catch(() => {
+            });
             }
 
             function mostrarAdvertencia() {
-                alertaActiva = true;
+            alertaActiva = true;
 
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Tu sesión está por expirar',
-                    html: 'Por inactividad, tu sesión se cerrará en <b></b> segundos.',
-                    timer: warningBeforeMs,
-                    timerProgressBar: true,
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showCancelButton: true,
-                    confirmButtonText: 'Extender sesión',
-                    cancelButtonText: 'Cerrar sesión',
-                    confirmButtonColor: '#0d6efd',
-                    cancelButtonColor: '#d33',
-                    didOpen: () => {
-                        const elemento = Swal.getHtmlContainer().querySelector('b');
-                        let restante = warningBeforeMs / 1000;
-                        elemento.textContent = restante;
+            Swal.fire({
+            icon: 'warning',
+            title: 'Tu sesión está por expirar',
+            html: 'Por inactividad, tu sesión se cerrará en <b></b> segundos.',
+            timer: warningBeforeMs,
+            timerProgressBar: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showCancelButton: true,
+            confirmButtonText: 'Extender sesión',
+            cancelButtonText: 'Cerrar sesión',
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#d33',
+            didOpen: () => {
+            const elemento = Swal.getHtmlContainer().querySelector('b');
+            let restante = warningBeforeMs / 1000;
+            elemento.textContent = restante;
 
-                        countdownInterval = setInterval(() => {
-                            restante--;
-                            elemento.textContent = restante;
-                            if (restante <= 0) clearInterval(countdownInterval);
-                        }, 1000);
-                    },
-                    willClose: () => {
-                        alertaActiva = false;
-                        clearInterval(countdownInterval);
-                    }
-                }).then((resultado) => {
-                    if (resultado.isConfirmed) {
-                        extenderSesion();
-                    } else {
-                        cerrarSesionPorInactividad();
-                    }
-                });
+            countdownInterval = setInterval(() => {
+            restante--;
+            elemento.textContent = restante;
+            if (restante <= 0) clearInterval(countdownInterval);
+            }, 1000);
+            },
+            willClose: () => {
+            alertaActiva = false;
+            clearInterval(countdownInterval);
+            }
+            }).then((resultado) => {
+            if (resultado.isConfirmed) {
+            extenderSesion();
+            } else {
+            cerrarSesionPorInactividad();
+            }
+            });
             }
 
             function extenderSesion() {
-                fetch('/Login/ExtenderSesion', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            ultimoToqueServidor = Date.now();
-                            reiniciarTimers();
-                        } else {
-                            cerrarSesionPorInactividad();
-                        }
-                    })
-                    .catch(() => cerrarSesionPorInactividad());
+            fetch('/Login/ExtenderSesion', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+            if (data.success) {
+            ultimoToqueServidor = Date.now();
+            reiniciarTimers();
+            } else {
+            cerrarSesionPorInactividad();
+            }
+            })
+            .catch(() => cerrarSesionPorInactividad());
             }
 
             function cerrarSesionPorInactividad() {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/Login/Logout';
-                document.body.appendChild(form);
-                form.submit();
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Login/Logout';
+            document.body.appendChild(form);
+            form.submit();
             }
 
             ['mousemove', 'keydown', 'click', 'scroll'].forEach(function (evento) {
-                document.addEventListener(evento, function () {
-                    if (!alertaActiva) {
-                        reiniciarTimers();
-                        tocarServidorSiCorresponde();
-                    }
-                });
+            document.addEventListener(evento, function () {
+            if (!alertaActiva) {
+            reiniciarTimers();
+            tocarServidorSiCorresponde();
+            }
+            });
             });
 
             reiniciarTimers();
-        })();
-    </script>
-}
+            })();
+        </script>
+    }
 </body>
 
 </html>

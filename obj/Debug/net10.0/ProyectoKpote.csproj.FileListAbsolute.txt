@@ -4614,3 +4614,4 @@ C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\refint\ProyectoKpote.dll
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ProyectoKpote.pdb
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ProyectoKpote.genruntimeconfig.cache
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ref\ProyectoKpote.dll
+C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ProyectoKpote.sourcelink.json
