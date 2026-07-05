@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ProyectoKpote</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ProyectoKpote.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/fontawesome/css/fontawesome.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/fontawesome/css/brands.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/fontawesome/css/solid.css" asp-append-version="true" />
+</head>
+
+@{
+    var esVisible = Context.Session.GetString("UsuarioLogueado") != null ? "" : "invisible";
+}
+
+<body>
+    <header>
+        <nav class="navbar bg-body-tertiary fixed-top">
+            <div class="container-fluid">
+                Prueba Técnica - Proyecto Kpote
+                <button style="background-color: white;" class="navbar-toggler @esVisible" type="button"
+                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
+                     aria-labelledby="offcanvasNavbarLabel">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">
+                            <i class="fa-solid fa-user-circle me-2"></i>@Context.Session.GetString("UsuarioLogueado")
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+                            <li class="nav-item">
+                                <a class="nav-link active" asp-controller="Home" asp-action="Index">
+                                    <i class="fa-solid fa-house me-2"></i>Home
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Perfil" asp-action="Index">
+                                    <i class="fa-solid fa-user me-2"></i>Perfil
+                                </a>
+                            </li>
+                            <hr class="dropdown-divider">
+                            <li class="nav-item">
+                                <form method="post" asp-controller="Login" asp-action="Logout">
+                                    <button type="submit" class="nav-link btn btn-link text-danger w-100 text-start"
+                                            style="text-decoration: none;">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            2026 - Desarrollado por Carlos Capote
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    @if (Context.Session.GetString("UsuarioLogueado") != null)
+{
+    <script>
+(function () {
+            const inactivityLimitMs = 60 * 1000;  // 1 minuto totales (PRUEBAS)
+            // const inactivityLimitMs = 20 * 60 * 1000; // 20 minutos totales (PRODUCCIÓN)
+            const warningBeforeMs = 15 * 1000;    // Aviso 15 segundos antes de expirar (PRUEBAS)
+
+            // IMPORTANTE: el IdleTimeout de la sesión (Program.cs) debe ser IGUAL o MAYOR
+            // a inactivityLimitMs. Si son iguales, la sesión del servidor puede expirar
+            // justo antes de que el usuario logre dar clic en "Extender sesión".
+
+            // Intervalo mínimo entre "toques" reales al servidor para mantener viva la
+            // sesión mientras el usuario está activo. No se hace un fetch en cada
+            // mousemove/keydown/click/scroll (sería excesivo); se limita (throttle) a
+            // este intervalo, y siempre debe ser menor a inactivityLimitMs.
+            const touchThrottleMs = 20 * 1000; // (PRUEBAS) ajustar proporcional si cambia inactivityLimitMs
+
+            let warningTimer;
+            let countdownInterval;
+            let alertaActiva = false;
+            let ultimoToqueServidor = 0;
+
+            function reiniciarTimers() {
+                clearTimeout(warningTimer);
+
+                if (alertaActiva) {
+                    Swal.close();
+                    alertaActiva = false;
+                }
+
+                warningTimer = setTimeout(mostrarAdvertencia, inactivityLimitMs - warningBeforeMs);
+            }
+
+            // Mantiene viva la sesión en el servidor mientras el usuario interactúa,
+            // para que el IdleTimeout de ASP.NET Core no expire "en silencio" mientras
+            // el contador del cliente sigue creyendo que hay actividad.
+            function tocarServidorSiCorresponde() {
+                const ahora = Date.now();
+
+                if (ahora - ultimoToqueServidor < touchThrottleMs) {
+                    return;
+                }
+
+                ultimoToqueServidor = ahora;
+
+                fetch('/Login/ExtenderSesion', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            // La sesión ya no existe en el servidor (expiró o se cerró
+                            // desde otra pestaña). No tiene sentido seguir esperando.
+                            cerrarSesionPorInactividad();
+                        }
+                    })
+                    .catch(() => {
+                        // Falla de red puntual: no forzamos logout aquí para evitar
+                        // cerrar sesión por un error transitorio de conexión.
+                    });
+            }
+
+            function mostrarAdvertencia() {
+                alertaActiva = true;
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tu sesión está por expirar',
+                    html: 'Por inactividad, tu sesión se cerrará en <b></b> segundos.',
+                    timer: warningBeforeMs,
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Extender sesión',
+                    cancelButtonText: 'Cerrar sesión',
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#d33',
+                    didOpen: () => {
+                        const elemento = Swal.getHtmlContainer().querySelector('b');
+                        let restante = warningBeforeMs / 1000;
+                        elemento.textContent = restante;
+
+                        countdownInterval = setInterval(() => {
+                            restante--;
+                            elemento.textContent = restante;
+                            if (restante <= 0) clearInterval(countdownInterval);
+                        }, 1000);
+                    },
+                    willClose: () => {
+                        alertaActiva = false;
+                        clearInterval(countdownInterval);
+                    }
+                }).then((resultado) => {
+                    if (resultado.isConfirmed) {
+                        extenderSesion();
+                    } else {
+                        cerrarSesionPorInactividad();
+                    }
+                });
+            }
+
+            function extenderSesion() {
+                fetch('/Login/ExtenderSesion', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            ultimoToqueServidor = Date.now();
+                            reiniciarTimers();
+                        } else {
+                            cerrarSesionPorInactividad();
+                        }
+                    })
+                    .catch(() => cerrarSesionPorInactividad());
+            }
+
+            function cerrarSesionPorInactividad() {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/Login/Logout';
+                document.body.appendChild(form);
+                form.submit();
+            }
+
+            ['mousemove', 'keydown', 'click', 'scroll'].forEach(function (evento) {
+                document.addEventListener(evento, function () {
+                    if (!alertaActiva) {
+                        reiniciarTimers();
+                        tocarServidorSiCorresponde();
+                    }
+                });
+            });
+
+            reiniciarTimers();
+        })();
+    </script>
+}
+</body>
+
+</html>

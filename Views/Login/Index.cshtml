@@ -1,0 +1,109 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="w-100" style="max-width: 400px;">
+
+        <div class="card p-4 shadow-sm mb-4">
+
+            <div class="btn-group mb-4" role="group" aria-label="Tipo de documento">
+                <button type="button" class="btn btn-secondary">DNI</button>
+                <button type="button" class="btn btn-outline-secondary">CE</button>
+            </div>
+
+            <form method="post" asp-controller="Login" asp-action="Index" novalidate>
+                <div class="mb-3">
+                    <label for="nombreUsuario" class="form-label">Usuario</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                        <input name="nombreUsuario" id="nombreUsuario" type="text"
+                               class="form-control @(ViewBag.ErrorUsuario != null ? "is-invalid" : "")"
+                               placeholder="Ingresar Usuario" value="@ViewBag.NombreUsuarioValor">
+                        @if (ViewBag.ErrorUsuario != null)
+                        {
+                            <div class="invalid-feedback">
+                                @ViewBag.ErrorUsuario
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input name="password" id="password" type="password"
+                               class="form-control @(ViewBag.ErrorPassword != null ? "is-invalid" : "")"
+                               placeholder="Ingresar Contraseña">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                        </button>
+                        @if (ViewBag.ErrorPassword != null)
+                        {
+                            <div class="invalid-feedback">
+                                @ViewBag.ErrorPassword
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <a href="#" style="text-decoration: none;">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Ingresar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card p-3 shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fa-solid fa-headset fa-2x text-primary"></i>
+                </div>
+                <div>
+                    <p class="mb-0">
+                        ¿Necesitas ayuda?, <a href="#" style="text-decoration: none;">contacte con el área de
+                        soporte.</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        const eyeIcon = document.querySelector('#eyeIcon');
+
+        togglePassword.addEventListener('click', function (e) {
+            // Cambiar el tipo de input
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+
+            // Cambiar el icono
+            eyeIcon.classList.toggle('fa-eye');
+            eyeIcon.classList.toggle('fa-eye-slash');
+        });
+    </script>
+
+    @if (ViewBag.UsuarioBloqueado == true)
+    {
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Usuario Bloqueado',
+                text: '@Html.Raw(ViewBag.MensajeBloqueo)',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#d33'
+            });
+        </script>
+    }
+}

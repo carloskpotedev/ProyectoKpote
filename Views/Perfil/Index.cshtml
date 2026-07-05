@@ -1,0 +1,246 @@
+@model ProyectoKpote.Models.Usuario
+@{
+    ViewData["Title"] = "Perfil de usuario";
+}
+
+<div class="container my-4">
+
+    <h2 class="fw-bold mb-4">Perfil de usuario</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+            <!-- Encabezado con avatar y datos principales -->
+            <div class="d-flex align-items-center mb-4">
+                <div class="me-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+                         style="width: 70px; height: 70px;">
+                        <i class="fa-solid fa-user fa-2x text-primary"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="mb-0 fw-bold">@Model.NombreUsuario</h5>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Activo</span>
+                    </div>
+                    <p class="text-muted mb-0">Administrador de Recursos</p>
+                    <p class="text-muted mb-0 small">011 Ministerio de Salud</p>
+                    <p class="text-muted mb-0 small">Fecha de creación: @Model.FechaCreacion.ToString("dd/MM/yyyy")</p>
+                    <p class="text-muted mb-0 small">Email: @Model.Email</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-4" id="perfilTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info"
+                            type="button" role="tab">
+                        Información básica
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="resp-tab" data-bs-toggle="tab" data-bs-target="#responsabilidades"
+                            type="button" role="tab">
+                        Responsabilidades
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial"
+                            type="button" role="tab">
+                        Historial de responsabilidades
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="perfilTabsContent">
+
+                <!-- Tab: Información básica -->
+                <div class="tab-pane fade show active" id="info" role="tabpanel">
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Nombres</label>
+                            <div class="form-control bg-light">July Camila</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Primer Apellido</label>
+                            <div class="form-control bg-light">Mendoza</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Segundo Apellido</label>
+                            <div class="form-control bg-light">Quispe</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Tipo de Documento de Identidad</label>
+                            <div class="form-control bg-light">DNI</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">N° de Documento de Identidad</label>
+                            <div class="form-control bg-light">07079879</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Fecha de nacimiento</label>
+                            <div class="form-control bg-light">15/04/1944</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Nacionalidad</label>
+                            <div class="form-control bg-light">Peruana</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Sexo</label>
+                            <div class="form-control bg-light">Femenino</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Correo electrónico principal</label>
+                            <div class="input-group">
+                                <span class="form-control bg-light">test@minsa.gob.pe</span>
+                                <span class="input-group-text bg-white">
+                                    <i class="fa-solid fa-pen text-primary"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">
+                                Correo electrónico secundario <span class="text-muted">(Opcional)</span>
+                            </label>
+                            <input type="text" class="form-control" placeholder="">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Teléfono Móvil</label>
+                            <div class="input-group">
+                                <span class="form-control bg-light">+51 999 999 999</span>
+                                <span class="input-group-text bg-white">
+                                    <i class="fa-solid fa-pen text-primary"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">
+                                Teléfono secundario <span class="text-muted">(Opcional)</span>
+                            </label>
+                            <div class="input-group">
+                                <select class="form-select" style="max-width: 100px;">
+                                    <option>Tipo</option>
+                                </select>
+                                <input type="text" class="form-control" disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Tipo de Contratación</label>
+                            <div class="form-control bg-light">CAS</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small mb-1">Fecha de contratación</label>
+                            <div class="form-control bg-light">@Model.FechaCreacion.ToString("dd/MM/yyyy")</div>
+                        </div>
+
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="fw-bold mb-3">Cambiar contraseña</h6>
+
+                    
+                    <form method="post" asp-controller="Perfil" asp-action="ChangePassword">
+                        <div class="row g-3">
+                            <!-- Nueva contraseña -->
+                            <div class="col-md-4">
+                                <label for="passwordNueva" class="form-label small text-muted mb-1">Nueva
+                                    contraseña</label>
+                                    <div class="input-group">
+                                        <input type="password" name="passwordNueva" id="passwordNueva" class="form-control"
+                                               required>
+                                        <button class="btn btn-outline-secondary" type="button"
+                                                onclick="togglePassword('passwordNueva')">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Confirmar nueva contraseña -->
+                                <div class="col-md-4">
+                                    <label for="passwordConfirmar" class="form-label small text-muted mb-1">Confirmar nueva
+                                        contraseña</label>
+                                        <div class="input-group">
+                                            <input type="password" name="passwordConfirmar" id="passwordConfirmar"
+                                                   class="form-control" required>
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                    onclick="togglePassword('passwordConfirmar')">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa-solid fa-key me-1"></i> Actualizar contraseña
+                                    </button>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <!-- Tab: Responsabilidades -->
+                        <div class="tab-pane fade" id="responsabilidades" role="tabpanel">
+                            <p class="text-muted">No hay responsabilidades registradas.</p>
+                        </div>
+
+                        <!-- Tab: Historial de responsabilidades -->
+                        <div class="tab-pane fade" id="historial" role="tabpanel">
+                            <p class="text-muted">No hay historial disponible.</p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        @section Scripts {
+            @if (TempData["PasswordExito"] != null)
+            {
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Listo!',
+                        text: '@TempData["PasswordExito"]',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                </script>
+            }
+
+            @if (TempData["PasswordError"] != null)
+            {
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'No se pudo actualizar',
+                        text: '@TempData["PasswordError"]',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#d33'
+                    });
+                </script>
+            }
+
+            <script>
+                function togglePassword(inputId) {
+                    const input = document.getElementById(inputId);
+                    const icon = input.nextElementSibling.querySelector('i');
+
+                    if (input.type === "password") {
+                        input.type = "text";
+                        icon.classList.remove("fa-eye");
+                        icon.classList.add("fa-eye-slash");
+                    } else {
+                        input.type = "password";
+                        icon.classList.remove("fa-eye-slash");
+                        icon.classList.add("fa-eye");
+                    }
+                }
+            </script>
+        }
