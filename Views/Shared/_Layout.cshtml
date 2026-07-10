@@ -14,68 +14,6 @@
     <link rel="stylesheet" href="~/fontawesome/css/solid.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/fontawesome/css/regular.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/fontawesome/css/regular.min.css" asp-append-version="true" />
-
-    <style>
-        .alerta-inactividad-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 1080;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .alerta-inactividad-overlay.show {
-            display: flex;
-        }
-
-        .alerta-inactividad {
-            background-color: #fff;
-            color: #212529;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 480px;          /* más ancho */
-            text-align: left;
-            overflow: hidden;          /* respeta border-radius en footer */
-            padding: 0;                /* quitamos padding general */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .alerta-inactividad-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            color: #212529;
-            padding: 24px 26px 0 26px;
-        }
-
-        .alerta-inactividad-header i {
-            color: #f0ad4e;
-            font-size: 1.2rem;
-        }
-
-        .alerta-inactividad-texto {
-            font-size: .9rem;
-            color: #495057;
-            padding: 8px 26px 18px 26px;
-            margin: 0;
-        }
-
-        /* Footer con fondo gris tenue */
-        .alerta-inactividad-acciones {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 10px;
-            background-color: #f1f3f5;   /* gris claro */
-            padding: 12px 26px;
-            border-radius: 0 0 10px 10px;
-        }
-    </style>
-
 </head>
 
 @{
@@ -97,7 +35,6 @@
 
     @if (logueado)
     {
-        <!-- Alerta de inactividad, tipo modal centrado -->
         <div id="alertaInactividad" class="alerta-inactividad-overlay">
             <div class="alerta-inactividad shadow" role="alertdialog" aria-modal="true"
                  aria-labelledby="alertaInactividadTitulo">
@@ -110,7 +47,6 @@
                     Para continuar, seleccione "Extender sesión"
                 </p>
                 <div class="alerta-inactividad-acciones">
-                    <!-- Botón "Cerrar sesión" eliminado -->
                     <button type="button" class="btn btn-warning fw-semibold" id="btnExtenderSesion">
                         Extender sesión
                     </button>
@@ -123,7 +59,6 @@
 
         @if (logueado)
         {
-            <!-- SIDEBAR IZQUIERDO -->
             <div class="collapse collapse-horizontal show" id="sidebarKpote">
                 <div class="sidebar-kpote d-flex flex-column h-100">
                     <ul class="nav nav-pills nav-flush flex-column text-center mb-auto">
@@ -160,7 +95,6 @@
         }
         else
         {
-            <!-- Barra roja superior (vista pública / login) -->
             <nav class="navbar navbar-dark px-4 navbar-kpote w-100">
                 <a class="navbar-brand d-flex align-items-center" href="#">
                     <img src="~/images/ceplan.png" alt="CEPLAN" style="height:50px;">
@@ -178,7 +112,6 @@
 
             @if (logueado)
             {
-                <!-- Barra roja -->
                 <nav class="navbar navbar-dark px-4 navbar-kpote">
                     <div class="d-flex align-items-center ms-auto gap-4">
                         <a href="#" class="text-white" title="Ayuda">
@@ -197,7 +130,6 @@
                         </div>
                     </div>
                 </nav>
-                <!-- Breadcrumb superior -->
                 <div class="bg-light px-4 py-2 border-bottom d-flex align-items-center">
                     <button class="btn btn-link text-dark p-0 me-3" type="button" data-bs-toggle="collapse"
                             data-bs-target="#sidebarKpote" aria-expanded="true" aria-controls="sidebarKpote"
@@ -208,7 +140,6 @@
                 </div>
             }
 
-            <!-- Contenido principal -->
             <main role="main" class="@(logueado ? "container-fluid p-4" : "container pb-3") flex-grow-1">
                 @RenderBody()
             </main>

@@ -2,98 +2,6 @@
     ViewData["Title"] = "Login";
 }
 
-<style>
-    .input-group.campo-invalido {
-        border: 1px solid #dc3545;
-        border-radius: .375rem;
-        overflow: hidden;
-    }
-
-    .input-group.campo-invalido .form-control,
-    .input-group.campo-invalido .input-group-text,
-    .input-group.campo-invalido .btn {
-        border: 0;
-        box-shadow: none;
-    }
-
-    .input-group.campo-invalido .form-control:focus {
-        box-shadow: none;
-    }
-
-    .feedback-invalido {
-        display: flex;
-        align-items: center;
-        gap: .375rem;
-        margin-top: .35rem;
-        font-size: .8125rem;
-        color: #dc3545;
-    }
-
-    .feedback-invalido i {
-        font-size: .8125rem;
-    }
-
-
-    /* Contenedor que fija la posición en la esquina inferior derecha */
-    .position-fixed {
-        top: auto !important;
-        /* Sobrescribimos el top-0 de Bootstrap */
-        bottom: 20px;
-        right: 20px;
-        left: auto !important;
-        /* Sobrescribimos el start-50 */
-        transform: none !important;
-        /* Quitamos el translate-middle-x */
-        width: auto !important;
-        /* Ajustamos el ancho */
-        max-width: 450px !important;
-    }
-
-    /* Estilos específicos del Toast */
-    .toast-inactividad {
-        background-color: #edf4ff !important;
-        /* Fondo azul muy claro */
-        border: none;
-        border-left: 6px solid #005fa7;
-        /* Borde lateral oscuro */
-        color: #1c1b1f;
-        /* Texto oscuro */
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    /* Ajustes para el icono y texto */
-    .toast-inactividad i {
-        color: #0067c0;
-        /* Color del icono */
-    }
-
-    .toast-body {
-        font-size: 0.95rem;
-        font-weight: 500;
-    }
-
-    /* Ajuste de la barra de progreso dentro del toast */
-    .progress-timer {
-        height: 4px;
-        width: 100%;
-        background-color: #d1e2f5;
-    }
-
-    .progress-bar-timer {
-        height: 100%;
-        background-color: #005fa7;
-        /* Color de la barra */
-        transition: width 0.1s linear;
-    }
-
-    /* Ajuste del botón cerrar (si el fondo es claro, debe ser oscuro) */
-    .btn-close {
-        filter: invert(1);
-        /* Ajuste sencillo para que el icono de cierre se vea oscuro */
-    }
-</style>
-
 <div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
     <div class="w-100" style="max-width: 400px;">
 
@@ -184,7 +92,6 @@
                 <button type="button" class="btn-close btn-close-white ms-3" data-bs-dismiss="toast"
                         aria-label="Close"></button>
             </div>
-            <!-- Barra de progreso (se encoge en 10 segundos) -->
             <div class="progress-timer">
                 <div id="progressBarTimer" class="progress-bar-timer" style="width: 100%;"></div>
             </div>
@@ -199,11 +106,9 @@
         const eyeIcon = document.querySelector('#eyeIcon');
 
         togglePassword.addEventListener('click', function (e) {
-            // Cambiar el tipo de input
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
             password.setAttribute('type', type);
 
-            // Cambiar el icono
             eyeIcon.classList.toggle('fa-eye');
             eyeIcon.classList.toggle('fa-eye-slash');
         });
@@ -234,34 +139,28 @@
                         if (remaining <= 0) {
                             clearInterval(timerId);
 
-                            // CORRECCIÓN: Forzamos el cierre del Toast de Bootstrap
                             if (toast) {
                                 toast.hide();
                             }
                         }
                     }
 
-                    // Inicializar el toast de Bootstrap con el delay de 10s
                     var toast = new bootstrap.Toast(toastEl, {
                         delay: duration,
                         animation: true,
                         autohide: true
                     });
 
-                    // Si el usuario cierra manualmente el toast, detener el contador
                     toastEl.addEventListener('hidden.bs.toast', function () {
                         if (timerId) {
                             clearInterval(timerId);
                         }
                     });
 
-                    // Mostrar el toast
                     toast.show();
 
-                    // Iniciar la barra de progreso
                     startTime = Date.now();
                     timerId = setInterval(updateProgress, intervalTime);
-                    // Asegurar que la barra comienza en 100%
                     updateProgress();
                 }
             });

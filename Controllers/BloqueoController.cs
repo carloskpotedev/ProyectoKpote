@@ -8,8 +8,7 @@ public class BloqueoController : Controller
 {
         public IActionResult Index()
     {
-        // Protege la ruta: solo es accesible si viene de la redirección de Login
-        // (TempData sobrevive únicamente a la siguiente petición y luego se elimina).
+
         if (TempData["UsuarioBloqueado"] == null)
         {
             return RedirectToAction("Index", "Login");
