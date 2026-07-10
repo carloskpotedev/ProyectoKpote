@@ -26,7 +26,8 @@
 
     var controladorActual = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
 
-    string ActivoSi(string controlador) => controladorActual.Equals(controlador, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    string ActivoSi(string controlador) => controladorActual.Equals(controlador, StringComparison.OrdinalIgnoreCase) ?
+"active" : "";
 
     var breadcrumb = ViewData["Breadcrumb"]?.ToString() ?? ViewData["Title"]?.ToString() ?? "";
 }
@@ -72,7 +73,7 @@
                         <li class="nav-item">
                             <a class="nav-link py-3 my-1 mx-2 rounded-3 text-dark @ActivoSi("Home")" asp-controller="Home"
                                asp-action="Index" title="Inicio">
-                               <i class="fa-solid fa-house"></i>
+                                <i class="fa-solid fa-house"></i>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -119,7 +120,8 @@
                         </a>
                         <a href="#" class="text-white position-relative" title="Notificaciones">
                             <i class="fa-regular fa-bell fa-lg"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark badge-notif">9+</span>
+                            <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark badge-notif">9+</span>
                         </a>
                         <div class="d-flex align-items-center text-white" id="bloqueUsuario">
                             <i class="fa-solid fa-circle-user fa-2x me-2"></i>
@@ -170,106 +172,105 @@
     {
         <script>
             (function () {
-                // Configuración del tiempo de inactividad
-                const inactivityLimitMinutos = 2; // TODO: cambiar a 20 en producción
-                const inactivityLimitMs = inactivityLimitMinutos * 60 * 1000;
-                const warningBeforeMs = 60 * 1000;
-                const touchThrottleMs = 60 * 1000;
+            const inactivityLimitMinutos = 20;
+            const inactivityLimitMs = inactivityLimitMinutos * 60 * 1000;
+            const warningBeforeMs = 60 * 1000;
+            const touchThrottleMs = 60 * 1000;
 
-                let warningTimer;
-                let countdownInterval;
-                let alertaActiva = false;
-                let ultimoToqueServidor = 0;
+            let warningTimer;
+            let countdownInterval;
+            let alertaActiva = false;
+            let ultimoToqueServidor = 0;
 
-                const alerta = document.getElementById('alertaInactividad');
-                const segundosSpan = document.getElementById('segundosRestantes');
-                const btnExtender = document.getElementById('btnExtenderSesion');
+            const alerta = document.getElementById('alertaInactividad');
+            const segundosSpan = document.getElementById('segundosRestantes');
+            const btnExtender = document.getElementById('btnExtenderSesion');
 
-                function reiniciarTimers() {
-                    clearTimeout(warningTimer);
-                    if (alertaActiva) {
-                        ocultarAlerta();
-                    }
-                    warningTimer = setTimeout(mostrarAdvertencia, inactivityLimitMs - warningBeforeMs);
-                }
+            function reiniciarTimers() {
+            clearTimeout(warningTimer);
+            if (alertaActiva) {
+            ocultarAlerta();
+            }
+            warningTimer = setTimeout(mostrarAdvertencia, inactivityLimitMs - warningBeforeMs);
+            }
 
-                function tocarServidorSiCorresponde() {
-                    const ahora = Date.now();
-                    if (ahora - ultimoToqueServidor < touchThrottleMs) {
-                        return;
-                    }
-                    ultimoToqueServidor = ahora;
-                    fetch('/Login/ExtenderSesion', { method: 'POST' })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (!data.success) {
-                                cerrarSesionPorInactividad();
-                            }
-                        })
-                        .catch(() => {});
-                }
+            function tocarServidorSiCorresponde() {
+            const ahora = Date.now();
+            if (ahora - ultimoToqueServidor < touchThrottleMs) {
+            return;
+            }
+            ultimoToqueServidor = ahora;
+            fetch('/Login/ExtenderSesion', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+            if (!data.success) {
+            cerrarSesionPorInactividad();
+            }
+            })
+            .catch(() => { });
+            }
 
-                function mostrarAdvertencia() {
-                    alertaActiva = true;
-                    alerta.classList.add('show');
-                    document.body.classList.add('overflow-hidden');
-                    btnExtender.focus();
+            function mostrarAdvertencia() {
+            alertaActiva = true;
+            alerta.classList.add('show');
+            document.body.classList.add('overflow-hidden');
+            btnExtender.focus();
 
-                    let restante = warningBeforeMs / 1000;
-                    segundosSpan.textContent = restante;
+            let restante = warningBeforeMs / 1000;
+            segundosSpan.textContent = restante;
 
-                    countdownInterval = setInterval(() => {
-                        restante--;
-                        segundosSpan.textContent = restante;
-                        if (restante <= 0) {
-                            clearInterval(countdownInterval);
-                            cerrarSesionPorInactividad();
-                        }
-                    }, 1000);
-                }
+            countdownInterval = setInterval(() => {
+            restante--;
+            segundosSpan.textContent = restante;
+            if (restante <= 0) {
+            clearInterval(countdownInterval);
+            cerrarSesionPorInactividad();
+            }
+            }, 1000);
+            }
 
-                function ocultarAlerta() {
-                    alerta.classList.remove('show');
-                    document.body.classList.remove('overflow-hidden');
-                    alertaActiva = false;
-                    clearInterval(countdownInterval);
-                }
+            function ocultarAlerta() {
+            alerta.classList.remove('show');
+            document.body.classList.remove('overflow-hidden');
+            alertaActiva = false;
+            clearInterval(countdownInterval);
+            }
 
-                function extenderSesion() {
-                    fetch('/Login/ExtenderSesion', { method: 'POST' })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                ocultarAlerta();
-                                ultimoToqueServidor = Date.now();
-                                reiniciarTimers();
-                            } else {
-                                cerrarSesionPorInactividad();
-                            }
-                        })
-                        .catch(() => cerrarSesionPorInactividad());
-                }
+            function extenderSesion() {
+            fetch('/Login/ExtenderSesion', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+            if (data.success) {
+            ocultarAlerta();
+            ultimoToqueServidor = Date.now();
+            reiniciarTimers();
+            } else {
+            cerrarSesionPorInactividad();
+            }
+            })
+            .catch(() => cerrarSesionPorInactividad());
+            }
 
-                function cerrarSesionPorInactividad() {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/Login/Logout?inactivo=true';
-                    document.body.appendChild(form);
-                    form.submit();
-                }
+            function cerrarSesionPorInactividad() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Login/Logout?inactivo=true';
+            document.body.appendChild(form);
+            form.submit();
+            }
 
-                btnExtender.addEventListener('click', extenderSesion);
+            btnExtender.addEventListener('click', extenderSesion);
 
-                ['mousemove', 'keydown', 'click', 'scroll'].forEach(function (evento) {
-                    document.addEventListener(evento, function () {
-                        if (!alertaActiva) {
-                            reiniciarTimers();
-                            tocarServidorSiCorresponde();
-                        }
-                    });
-                });
+            ['mousemove', 'keydown', 'click', 'scroll'].forEach(function (evento) {
+            document.addEventListener(evento, function () {
+            if (!alertaActiva) {
+            reiniciarTimers();
+            tocarServidorSiCorresponde();
+            }
+            });
+            });
 
-                reiniciarTimers();
+            reiniciarTimers();
             })();
         </script>
     }
