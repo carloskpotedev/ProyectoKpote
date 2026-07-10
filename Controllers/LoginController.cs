@@ -84,9 +84,9 @@ namespace ProyectoKpote.Controllers
             if (usuario.BloqueadoHasta.HasValue && usuario.BloqueadoHasta.Value > DateTime.Now)
             {
                 var minutosRestantes = Math.Ceiling((usuario.BloqueadoHasta.Value - DateTime.Now).TotalMinutes);
-                ViewBag.UsuarioBloqueado = true;
-                ViewBag.MensajeBloqueo = $"Intente nuevamente en {minutosRestantes} minuto(s).";
-                return View();
+                TempData["UsuarioBloqueado"] = true;
+                TempData["MensajeBloqueo"] = $"Intente nuevamente en {minutosRestantes} minuto(s).";
+                return RedirectToAction("Index", "Bloqueo");
             }
 
             if (usuario.BloqueadoHasta.HasValue && usuario.BloqueadoHasta.Value <= DateTime.Now)
@@ -138,9 +138,9 @@ namespace ProyectoKpote.Controllers
                         _logger.LogError(ex, "Error al enviar el correo de bloqueo a {Destinatario} para el usuario {Usuario}.", usuario.Email, usuario.NombreUsuario);
                     }
 
-                    ViewBag.UsuarioBloqueado = true;
-                    ViewBag.MensajeBloqueo = "Ha superado el número de intentos permitidos. Su usuario ha sido bloqueado por 15 minutos.";
-                    return View();
+                    TempData["UsuarioBloqueado"] = true;
+                    TempData["MensajeBloqueo"] = "Ha superado el número de intentos permitidos. Su usuario ha sido bloqueado por 15 minutos.";
+                    return RedirectToAction("Index", "Bloqueo");
                 }
 
                 try
@@ -191,13 +191,18 @@ namespace ProyectoKpote.Controllers
         }
 
         [HttpPost]
-        public IActionResult Logout()
+        public IActionResult Logout(bool? inactivo)   
         {
             try
             {
                 var usuario = HttpContext.Session.GetString("UsuarioLogueado");
                 HttpContext.Session.Clear();
                 _logger.LogInformation("Cierre de sesión realizado para el usuario {Usuario}.", usuario);
+
+                if (inactivo == true)
+                {
+                    TempData["MensajeInactividad"] = "Su sesión ha expirado debido a inactividad. Por favor, inicie sesión nuevamente.";
+                }
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,74 +12,226 @@
     <link rel="stylesheet" href="~/fontawesome/css/fontawesome.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/fontawesome/css/brands.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/fontawesome/css/solid.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/fontawesome/css/regular.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/fontawesome/css/regular.min.css" asp-append-version="true" />
+
+    <style>
+        .alerta-inactividad-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1080;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .alerta-inactividad-overlay.show {
+            display: flex;
+        }
+
+        .alerta-inactividad {
+            background-color: #fff;
+            color: #212529;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 480px;          /* más ancho */
+            text-align: left;
+            overflow: hidden;          /* respeta border-radius en footer */
+            padding: 0;                /* quitamos padding general */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .alerta-inactividad-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #212529;
+            padding: 24px 26px 0 26px;
+        }
+
+        .alerta-inactividad-header i {
+            color: #f0ad4e;
+            font-size: 1.2rem;
+        }
+
+        .alerta-inactividad-texto {
+            font-size: .9rem;
+            color: #495057;
+            padding: 8px 26px 18px 26px;
+            margin: 0;
+        }
+
+        /* Footer con fondo gris tenue */
+        .alerta-inactividad-acciones {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            background-color: #f1f3f5;   /* gris claro */
+            padding: 12px 26px;
+            border-radius: 0 0 10px 10px;
+        }
+    </style>
+
 </head>
 
 @{
-    var esVisible = Context.Session.GetString("UsuarioLogueado") != null ? "" : "invisible";
+    var logueado = Context.Session.GetString("UsuarioLogueado") != null;
+    var nombreUsuario = Context.Session.GetString("UsuarioLogueado");
+    var rolUsuario = Context.Session.GetString("RolUsuario") ?? "Operador";
+
+    var currentPath = ViewContext.HttpContext.Request.Path.Value ?? "/";
+    var isHome = currentPath == "/" || currentPath.Equals("/Bloqueo", StringComparison.OrdinalIgnoreCase);
+
+    var controladorActual = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+
+    string ActivoSi(string controlador) => controladorActual.Equals(controlador, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+
+    var breadcrumb = ViewData["Breadcrumb"]?.ToString() ?? ViewData["Title"]?.ToString() ?? "";
 }
 
-<body>
-    <header>
-        <nav class="navbar bg-body-tertiary fixed-top">
-            <div class="container-fluid">
-                Prueba Técnica - Proyecto Kpote
-                <button style="background-color: white;" class="navbar-toggler @esVisible" type="button"
-                        data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar"
-                        aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
-                     aria-labelledby="offcanvasNavbarLabel">
-                    <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">
-                            <i class="fa-solid fa-user-circle me-2"></i>@Context.Session.GetString("UsuarioLogueado")
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                    </div>
-                    <div class="offcanvas-body">
-                        <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-                            <li class="nav-item">
-                                <a class="nav-link active" asp-controller="Home" asp-action="Index">
-                                    <i class="fa-solid fa-house me-2"></i>Home
-                                </a>
-                            </li>
+<body class="@(isHome ? "home-background" : "")">
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Perfil" asp-action="Index">
-                                    <i class="fa-solid fa-user me-2"></i>Perfil
-                                </a>
-                            </li>
-                            <hr class="dropdown-divider">
-                            <li class="nav-item">
-                                <form method="post" asp-controller="Login" asp-action="Logout">
-                                    <button type="submit" class="nav-link btn btn-link text-danger w-100 text-start"
-                                            style="text-decoration: none;">
-                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+    @if (logueado)
+    {
+        <!-- Alerta de inactividad, tipo modal centrado -->
+        <div id="alertaInactividad" class="alerta-inactividad-overlay">
+            <div class="alerta-inactividad shadow" role="alertdialog" aria-modal="true"
+                 aria-labelledby="alertaInactividadTitulo">
+                <div class="alerta-inactividad-header" id="alertaInactividadTitulo">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Su sesión está a punto de expirar</span>
+                </div>
+                <p class="alerta-inactividad-texto">
+                    Por seguridad, su sesión expirará en <strong id="segundosRestantes">60</strong> segundos.
+                    Para continuar, seleccione "Extender sesión"
+                </p>
+                <div class="alerta-inactividad-acciones">
+                    <!-- Botón "Cerrar sesión" eliminado -->
+                    <button type="button" class="btn btn-warning fw-semibold" id="btnExtenderSesion">
+                        Extender sesión
+                    </button>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </div>
+    }
+
+    <div class="d-flex @(logueado ? "" : "flex-column")" id="wrapper">
+
+        @if (logueado)
+        {
+            <!-- SIDEBAR IZQUIERDO -->
+            <div class="collapse collapse-horizontal show" id="sidebarKpote">
+                <div class="sidebar-kpote d-flex flex-column h-100">
+                    <ul class="nav nav-pills nav-flush flex-column text-center mb-auto">
+                        <li class="nav-item">
+                            <button type="button" class="nav-link btn py-3 my-1 mx-2 rounded-3 text-dark border-0"
+                                    data-bs-toggle="collapse" data-bs-target="#sidebarKpote" aria-expanded="true"
+                                    aria-controls="sidebarKpote" title="Menú">
+                                <i class="fa-solid fa-bars fa-md"></i>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-3 my-1 mx-2 rounded-3 text-dark @ActivoSi("Home")" asp-controller="Home"
+                               asp-action="Index" title="Inicio">
+                               <i class="fa-solid fa-house"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-3 my-1 mx-2 rounded-3 text-dark @ActivoSi("Perfil")"
+                               asp-controller="Perfil" asp-action="Index" title="Perfil">
+                                <i class="fa-regular fa-file-lines fa-md"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <form method="post" asp-controller="Login" asp-action="Logout">
+                                <button type="submit" class="nav-link btn py-3 my-1 mx-2 rounded-3 text-dark border-0"
+                                        title="Cerrar sesión">
+                                    <i class="fa-solid fa-right-from-bracket fa-md"></i>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Barra roja superior (vista pública / login) -->
+            <nav class="navbar navbar-dark px-4 navbar-kpote w-100">
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img src="~/images/ceplan.png" alt="CEPLAN" style="height:50px;">
+                </a>
+                <div class="d-flex align-items-center ms-auto">
+                    <a href="#" class="text-white" title="Ayuda">
+                        <i class="fa-regular fa-circle-question fa-lg"></i>
+                    </a>
+                </div>
+            </nav>
+        }
+
+        <!-- CONTENIDO -->
+        <div class="flex-grow-1 d-flex flex-column min-vh-100">
+
+            @if (logueado)
+            {
+                <!-- Barra roja -->
+                <nav class="navbar navbar-dark px-4 navbar-kpote">
+                    <div class="d-flex align-items-center ms-auto gap-4">
+                        <a href="#" class="text-white" title="Ayuda">
+                            <i class="fa-regular fa-circle-question fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-white position-relative" title="Notificaciones">
+                            <i class="fa-regular fa-bell fa-lg"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark badge-notif">9+</span>
+                        </a>
+                        <div class="d-flex align-items-center text-white" id="bloqueUsuario">
+                            <i class="fa-solid fa-circle-user fa-2x me-2"></i>
+                            <div class="text-start lh-sm">
+                                <div class="fw-semibold small">@nombreUsuario</div>
+                                <small class="text-white-50">@rolUsuario</small>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <!-- Breadcrumb superior -->
+                <div class="bg-light px-4 py-2 border-bottom d-flex align-items-center">
+                    <button class="btn btn-link text-dark p-0 me-3" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#sidebarKpote" aria-expanded="true" aria-controls="sidebarKpote"
+                            title="Mostrar/ocultar menú">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <small class="text-muted">@breadcrumb</small>
+                </div>
+            }
+
+            <!-- Contenido principal -->
+            <main role="main" class="@(logueado ? "container-fluid p-4" : "container pb-3") flex-grow-1">
+                @RenderBody()
+            </main>
+
+            <footer class="footer-peru">
+                <div class="footer-contenedor">
+                    <img src="../images/escudo.png" alt="Escudo Perú" class="footer-logo">
+                    <div class="footer-item texto-peru">PERÚ</div>
+                    <div class="footer-item bloque-gris-oscuro">
+                        Presidencia<br>del Consejo de<br>Ministros
+                    </div>
+                    <div class="footer-item bloque-gris-claro">
+                        Centro Nacional de<br>Planeamiento<br>Estratégico
+                    </div>
+                </div>
+            </footer>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container text-center">
-            2026 - Desarrollado por Carlos Capote
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
     @await RenderSectionAsync("Scripts", required: false)
 
@@ -87,120 +239,106 @@
     {
         <script>
             (function () {
-            const inactivityLimitMs = 20 * 60 * 1000;
+                // Configuración del tiempo de inactividad
+                const inactivityLimitMinutos = 2; // TODO: cambiar a 20 en producción
+                const inactivityLimitMs = inactivityLimitMinutos * 60 * 1000;
+                const warningBeforeMs = 60 * 1000;
+                const touchThrottleMs = 60 * 1000;
 
-            const warningBeforeMs = 60 * 1000;
+                let warningTimer;
+                let countdownInterval;
+                let alertaActiva = false;
+                let ultimoToqueServidor = 0;
 
-            const touchThrottleMs = 60 * 1000;
+                const alerta = document.getElementById('alertaInactividad');
+                const segundosSpan = document.getElementById('segundosRestantes');
+                const btnExtender = document.getElementById('btnExtenderSesion');
 
-            let warningTimer;
-            let countdownInterval;
-            let alertaActiva = false;
-            let ultimoToqueServidor = 0;
+                function reiniciarTimers() {
+                    clearTimeout(warningTimer);
+                    if (alertaActiva) {
+                        ocultarAlerta();
+                    }
+                    warningTimer = setTimeout(mostrarAdvertencia, inactivityLimitMs - warningBeforeMs);
+                }
 
-            function reiniciarTimers() {
-            clearTimeout(warningTimer);
+                function tocarServidorSiCorresponde() {
+                    const ahora = Date.now();
+                    if (ahora - ultimoToqueServidor < touchThrottleMs) {
+                        return;
+                    }
+                    ultimoToqueServidor = ahora;
+                    fetch('/Login/ExtenderSesion', { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                cerrarSesionPorInactividad();
+                            }
+                        })
+                        .catch(() => {});
+                }
 
-            if (alertaActiva) {
-            Swal.close();
-            alertaActiva = false;
-            }
+                function mostrarAdvertencia() {
+                    alertaActiva = true;
+                    alerta.classList.add('show');
+                    document.body.classList.add('overflow-hidden');
+                    btnExtender.focus();
 
-            warningTimer = setTimeout(mostrarAdvertencia, inactivityLimitMs - warningBeforeMs);
-            }
+                    let restante = warningBeforeMs / 1000;
+                    segundosSpan.textContent = restante;
 
-            function tocarServidorSiCorresponde() {
-            const ahora = Date.now();
+                    countdownInterval = setInterval(() => {
+                        restante--;
+                        segundosSpan.textContent = restante;
+                        if (restante <= 0) {
+                            clearInterval(countdownInterval);
+                            cerrarSesionPorInactividad();
+                        }
+                    }, 1000);
+                }
 
-            if (ahora - ultimoToqueServidor < touchThrottleMs) {
-            return;
-            }
+                function ocultarAlerta() {
+                    alerta.classList.remove('show');
+                    document.body.classList.remove('overflow-hidden');
+                    alertaActiva = false;
+                    clearInterval(countdownInterval);
+                }
 
-            ultimoToqueServidor = ahora;
+                function extenderSesion() {
+                    fetch('/Login/ExtenderSesion', { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                ocultarAlerta();
+                                ultimoToqueServidor = Date.now();
+                                reiniciarTimers();
+                            } else {
+                                cerrarSesionPorInactividad();
+                            }
+                        })
+                        .catch(() => cerrarSesionPorInactividad());
+                }
 
-            fetch('/Login/ExtenderSesion', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-            if (!data.success) {
-            cerrarSesionPorInactividad();
-            }
-            })
-            .catch(() => {
-            });
-            }
+                function cerrarSesionPorInactividad() {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/Login/Logout?inactivo=true';
+                    document.body.appendChild(form);
+                    form.submit();
+                }
 
-            function mostrarAdvertencia() {
-            alertaActiva = true;
+                btnExtender.addEventListener('click', extenderSesion);
 
-            Swal.fire({
-            icon: 'warning',
-            title: 'Tu sesión está por expirar',
-            html: 'Por inactividad, tu sesión se cerrará en <b></b> segundos.',
-            timer: warningBeforeMs,
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showCancelButton: true,
-            confirmButtonText: 'Extender sesión',
-            cancelButtonText: 'Cerrar sesión',
-            confirmButtonColor: '#0d6efd',
-            cancelButtonColor: '#d33',
-            didOpen: () => {
-            const elemento = Swal.getHtmlContainer().querySelector('b');
-            let restante = warningBeforeMs / 1000;
-            elemento.textContent = restante;
+                ['mousemove', 'keydown', 'click', 'scroll'].forEach(function (evento) {
+                    document.addEventListener(evento, function () {
+                        if (!alertaActiva) {
+                            reiniciarTimers();
+                            tocarServidorSiCorresponde();
+                        }
+                    });
+                });
 
-            countdownInterval = setInterval(() => {
-            restante--;
-            elemento.textContent = restante;
-            if (restante <= 0) clearInterval(countdownInterval);
-            }, 1000);
-            },
-            willClose: () => {
-            alertaActiva = false;
-            clearInterval(countdownInterval);
-            }
-            }).then((resultado) => {
-            if (resultado.isConfirmed) {
-            extenderSesion();
-            } else {
-            cerrarSesionPorInactividad();
-            }
-            });
-            }
-
-            function extenderSesion() {
-            fetch('/Login/ExtenderSesion', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-            if (data.success) {
-            ultimoToqueServidor = Date.now();
-            reiniciarTimers();
-            } else {
-            cerrarSesionPorInactividad();
-            }
-            })
-            .catch(() => cerrarSesionPorInactividad());
-            }
-
-            function cerrarSesionPorInactividad() {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/Login/Logout';
-            document.body.appendChild(form);
-            form.submit();
-            }
-
-            ['mousemove', 'keydown', 'click', 'scroll'].forEach(function (evento) {
-            document.addEventListener(evento, function () {
-            if (!alertaActiva) {
-            reiniciarTimers();
-            tocarServidorSiCorresponde();
-            }
-            });
-            });
-
-            reiniciarTimers();
+                reiniciarTimers();
             })();
         </script>
     }

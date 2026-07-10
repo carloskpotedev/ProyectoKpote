@@ -2455,7 +2455,6 @@ C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\scopedcss\bundle\ProyectoKpote.styles.css
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\scopedcss\projectbundle\ProyectoKpote.bundle.scp.css
-C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\compressed\nn6g1i9g6u-{0}-hcyrulyzmk-hcyrulyzmk.gz
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\compressed\mtot81kqqf-{0}-61n19gt1b8-61n19gt1b8.gz
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\compressed\ycrx3a5hhr-{0}-hjj50vwly3-hjj50vwly3.gz
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\compressed\xzoyc76xt5-{0}-wjhuarmh55-wjhuarmh55.gz
@@ -4615,3 +4614,4 @@ C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ProyectoKpote.pdb
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ProyectoKpote.genruntimeconfig.cache
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ref\ProyectoKpote.dll
 C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\ProyectoKpote.sourcelink.json
+C:\Users\User\Desktop\ProyectoKpote\obj\Debug\net10.0\compressed\nn6g1i9g6u-{0}-e5vve86d6c-e5vve86d6c.gz
